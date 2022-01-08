@@ -6,6 +6,10 @@ static const bool REVERSE_MOUSE_BUTTONS = true;
 static const bool ALLOW_ENABLE_VIA_GAMEPAD = true;
 /******************************************************/
 
+#pragma comment(lib, "winmm")
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
+
 #include <Windows.h>
 #include <iostream>
 #include <thread>       
@@ -17,6 +21,10 @@ static const bool ALLOW_ENABLE_VIA_GAMEPAD = true;
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+const float clamp(const float& x, const float& upper, const float& lower) {
+    return min(upper, max(x, lower));
+}
 
 struct mouse_state
 {
@@ -404,6 +412,36 @@ void check_keyboard_input()
     }
 }
 
+bool change_volume(float delta)
+{
+    HRESULT hr = NULL;
+
+    CoInitialize(NULL);
+
+    IMMDeviceEnumerator* deviceEnumerator = NULL;
+    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID*)&deviceEnumerator);
+    IMMDevice* defaultDevice = NULL;
+
+    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
+    deviceEnumerator->Release();
+    deviceEnumerator = NULL;
+
+    IAudioEndpointVolume* endpointVolume = NULL;
+    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID*)&endpointVolume);
+    defaultDevice->Release();
+    defaultDevice = NULL;
+
+    float currentVolume = 0;
+    endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
+    endpointVolume->SetMasterVolumeLevelScalar(clamp(currentVolume + delta, 1.0f, 0.0f), NULL);
+
+    endpointVolume->Release();
+
+    CoUninitialize();
+
+    return FALSE;
+}
+
 int main()
 {
     ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -561,6 +599,15 @@ int main()
                     paste_pressed();
                 else if (g_prev_vir_state.paste_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
                     paste_released();
+
+                cout << "R: " << state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] << endl;
+                cout << "L: " << state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] << endl;
+
+                if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > 0.2f)
+                    change_volume(0.01f);
+
+                if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] > 0.2f)
+                    change_volume(-0.01f);
 
                 this_thread::sleep_for(chrono::milliseconds(5));
                 continue;

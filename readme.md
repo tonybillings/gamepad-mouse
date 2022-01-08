@@ -42,6 +42,10 @@ If the `ALLOW_ENABLE_VIA_GAMEPAD` parameter is set to true in `main.cpp`, you ca
 
 **Right Bumper** -> Left mouse button.  Can be mapped to the right mouse button by changing the `REVERSE_MOUSE_BUTTONS` parameter at the top of `main.cpp`.
 
+**Left Trigger** -> Decrease the volume.
+
+**Right Trigger** -> Increase the volume.
+
 **X Button** -> Minimize the window currently being hovered over by the mouse cursor.  
 
 **Y Button** -> Maximize the window currently being hovered over by the mouse cursor.  
