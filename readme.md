@@ -46,6 +46,14 @@ To be as efficient as possible, the app wakes up just once a second to check the
 
 **B Button** -> Enter/return key.
 
+**D-Pad Up** -> Up arrow.  
+
+**D-Pad Down** -> Down arrow.  
+
+**D-Pad Left** -> Left arrow.  
+
+**D-Pad Right** -> Right arrow.  
+
 **Back Button** -> Select-all (CTRL+A).  
 
 **Left Thumbstick Button** -> Copy (CTRL+C).  
