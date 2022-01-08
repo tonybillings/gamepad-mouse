@@ -426,6 +426,8 @@ int main()
     thread keyboard_input_thread(check_keyboard_input);
     keyboard_input_thread.detach();
 
+    unsigned int dpad_repeat_count = 0;
+
     while(true) {
         if (g_should_quit) break;
 
@@ -458,25 +460,53 @@ int main()
                     else if (g_prev_ms_state.right_button_pressed && !state.buttons[right_bumper])
                         right_mouse_button_released();
 
-                    if (!g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
+                    if (!g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                        dpad_repeat_count = 0;
                         up_arrow_pressed();
-                    else if (g_prev_kb_state.up_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
+                    } else if (g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                        dpad_repeat_count++;
+                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
+                            up_arrow_pressed();
+                    } else if (g_prev_kb_state.up_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                        dpad_repeat_count = 0;
                         up_arrow_released();
+                    }
 
-                    if (!g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+                    if (!g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                        dpad_repeat_count = 0;
                         down_arrow_pressed();
-                    else if (g_prev_kb_state.down_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+                    } else if (g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                        dpad_repeat_count++;
+                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
+                            down_arrow_pressed();
+                    } else if (g_prev_kb_state.down_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                        dpad_repeat_count = 0;
                         down_arrow_released();
+                    }
 
-                    if (!g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+                    if (!g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                        dpad_repeat_count = 0;
                         left_arrow_pressed();
-                    else if (g_prev_kb_state.left_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+                    } else if (g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                        dpad_repeat_count++;
+                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
+                            left_arrow_pressed();
+                    } else if (g_prev_kb_state.left_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                        dpad_repeat_count = 0;
                         left_arrow_released();
+                    }
 
-                    if (!g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
+                    if (!g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                        dpad_repeat_count = 0;
                         right_arrow_pressed();
-                    else if (g_prev_kb_state.right_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
+                    } else if (g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                        dpad_repeat_count++;
+                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
+                            right_arrow_pressed();
+                    } else if (g_prev_kb_state.right_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                        dpad_repeat_count = 0;
                         right_arrow_released();
+                    }
 
                     if (!g_prev_kb_state.space_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_A])
                         space_pressed();
