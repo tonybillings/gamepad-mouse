@@ -600,9 +600,6 @@ int main()
                 else if (g_prev_vir_state.paste_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
                     paste_released();
 
-                cout << "R: " << state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] << endl;
-                cout << "L: " << state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] << endl;
-
                 if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > 0.2f)
                     change_volume(0.01f);
 
