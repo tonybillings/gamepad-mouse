@@ -384,6 +384,7 @@ void check_keyboard_input()
 {
     while (true) {
         if (GetKeyState(VK_F12) < 0 && (GetKeyState(VK_LCONTROL) < 0 || GetKeyState(VK_RCONTROL) < 0)) {
+            while (ShowCursor(TRUE) <= 0);
             g_is_enabled = true;
             check_joysticks();
             cout << "GamepadMouse has been enabled." << endl;
@@ -572,6 +573,7 @@ int main()
 
                 if (state.buttons[GLFW_GAMEPAD_BUTTON_X] && state.buttons[GLFW_GAMEPAD_BUTTON_Y] &&
                     state.buttons[GLFW_GAMEPAD_BUTTON_A] && state.buttons[GLFW_GAMEPAD_BUTTON_B]) {
+                    while (ShowCursor(TRUE) <= 0);
                     g_is_enabled = true;
                     cout << "GamepadMouse has been enabled." << endl;
                     MessageBeep(MB_ICONASTERISK);

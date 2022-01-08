@@ -71,3 +71,7 @@ Currently there is no way to change the mapping via a config file, but using the
 ## Cursor Movement
 
 You can use either the left or right thumbstick to move the mouse and the angle of both sticks will be added together when calculating the final velocity.  That means if you move both sticks in the same direction it will make the mouse move faster in that direction (so don't move them in opposite directions or else the mouse may not move at all!)  If the cursor moves too fast/slow, you can adjust its speed by changing the `MOUSE_SPEED` parameter at the top of `main.cpp`.  
+
+## Known Issues
+
+If you have the app execute upon logging in and you reboot your computer, log into Windows either with no mouse plugged in or with absolutely no mouse movement at all, then the cursor will not render on the screen.  The cursor will exist and can still be controlled by the gamepad, but it will remain invisible until a mouse is connected and it is moved.  This is a known issue with Windows that should be avoided with the call to ShowCursor() but for now I haven't found a workaround.  '
