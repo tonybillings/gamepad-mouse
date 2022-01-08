@@ -32,6 +32,10 @@ When the app starts up, it does so in a "disabled" state, sleeping most of the t
 
 To be as efficient as possible, the app wakes up just once a second to check the keyboard state, so that means you may have to hold the combination of keys for up to one second before the app recognizes the command being sent.  You will hear a distinct sound for both the enable/disable commands and you can always show the console for visual confirmation.  
 
+## Enable/Disable via Gamepad
+
+If the `ALLOW_ENABLE_VIA_GAMEPAD` parameter is set to true in `main.cpp`, you can toggle the enabled state of the service by pressing the X, Y, A, and B buttons simultaneously.  Like the keyboard-based commands, the app only checks the state of the gamepad for this command once per second when the service is currently disabled, so you may need to keep the buttons down for up to one second.  When the service is enabled, the gamepad poll rate is much faster (~200 Hz).  
+
 ## Gamepad Button Mapping
 
 **Left Bumper** -> Right mouse button.  Can be mapped to the left mouse button by changing the `REVERSE_MOUSE_BUTTONS` parameter at the top of `main.cpp`.

@@ -3,6 +3,7 @@ PARAMETERS
 ******************************************************/
 static const float MOUSE_SPEED = 10.0f;
 static const bool REVERSE_MOUSE_BUTTONS = true;
+static const bool ALLOW_ENABLE_VIA_GAMEPAD = true;
 /******************************************************/
 
 #include <Windows.h>
@@ -437,119 +438,143 @@ int main()
             if (g_js_connected) {
                 GLFWgamepadstate state;
 
-                if (glfwGetGamepadState(0, &state)) {
-                    POINT cur_pos;
-                    if (GetCursorPos(&cur_pos))
-                    {
-                        auto x = state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
-                        auto y = state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
-                        if (abs(x) < 0.2) x = 0;
-                        if (abs(y) < 0.2) y = 0;
-                        auto x_velocity = x * MOUSE_SPEED;
-                        auto y_velocity = y * MOUSE_SPEED;
-                        SetCursorPos(cur_pos.x + x_velocity, cur_pos.y + y_velocity);
+                if (!glfwGetGamepadState(g_js_id, &state)) continue;
+
+                if (ALLOW_ENABLE_VIA_GAMEPAD) {
+                    if (state.buttons[GLFW_GAMEPAD_BUTTON_X] && state.buttons[GLFW_GAMEPAD_BUTTON_Y] &&
+                        state.buttons[GLFW_GAMEPAD_BUTTON_A] && state.buttons[GLFW_GAMEPAD_BUTTON_B]) {
+                        g_is_enabled = false;
+                        MessageBeep(MB_ICONERROR);
+                        cout << "GamepadMouse has been disabled." << endl; 
+                        this_thread::sleep_for(chrono::seconds(3));
+                        continue;
                     }
+                }
 
-                    if (!g_prev_ms_state.left_button_pressed && state.buttons[left_bumper])
-                        left_mouse_button_pressed();
-                    else if (g_prev_ms_state.left_button_pressed && !state.buttons[left_bumper])
-                        left_mouse_button_released();
+                POINT cur_pos;
+                if (GetCursorPos(&cur_pos))
+                {
+                    auto x = state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+                    auto y = state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+                    if (abs(x) < 0.2) x = 0;
+                    if (abs(y) < 0.2) y = 0;
+                    auto x_velocity = x * MOUSE_SPEED;
+                    auto y_velocity = y * MOUSE_SPEED;
+                    SetCursorPos(cur_pos.x + x_velocity, cur_pos.y + y_velocity);
+                }
 
-                    if (!g_prev_ms_state.right_button_pressed && state.buttons[right_bumper])
-                        right_mouse_button_pressed();
-                    else if (g_prev_ms_state.right_button_pressed && !state.buttons[right_bumper])
-                        right_mouse_button_released();
+                if (!g_prev_ms_state.left_button_pressed && state.buttons[left_bumper])
+                    left_mouse_button_pressed();
+                else if (g_prev_ms_state.left_button_pressed && !state.buttons[left_bumper])
+                    left_mouse_button_released();
 
-                    if (!g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
-                        dpad_repeat_count = 0;
+                if (!g_prev_ms_state.right_button_pressed && state.buttons[right_bumper])
+                    right_mouse_button_pressed();
+                else if (g_prev_ms_state.right_button_pressed && !state.buttons[right_bumper])
+                    right_mouse_button_released();
+
+                if (!g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                    dpad_repeat_count = 0;
+                    up_arrow_pressed();
+                } else if (g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                    dpad_repeat_count++;
+                    if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
                         up_arrow_pressed();
-                    } else if (g_prev_kb_state.up_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
-                        dpad_repeat_count++;
-                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
-                            up_arrow_pressed();
-                    } else if (g_prev_kb_state.up_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
-                        dpad_repeat_count = 0;
-                        up_arrow_released();
-                    }
+                } else if (g_prev_kb_state.up_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) {
+                    dpad_repeat_count = 0;
+                    up_arrow_released();
+                }
 
-                    if (!g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
-                        dpad_repeat_count = 0;
+                if (!g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                    dpad_repeat_count = 0;
+                    down_arrow_pressed();
+                } else if (g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                    dpad_repeat_count++;
+                    if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
                         down_arrow_pressed();
-                    } else if (g_prev_kb_state.down_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
-                        dpad_repeat_count++;
-                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
-                            down_arrow_pressed();
-                    } else if (g_prev_kb_state.down_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
-                        dpad_repeat_count = 0;
-                        down_arrow_released();
-                    }
+                } else if (g_prev_kb_state.down_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) {
+                    dpad_repeat_count = 0;
+                    down_arrow_released();
+                }
 
-                    if (!g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
-                        dpad_repeat_count = 0;
+                if (!g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                    dpad_repeat_count = 0;
+                    left_arrow_pressed();
+                } else if (g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                    dpad_repeat_count++;
+                    if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
                         left_arrow_pressed();
-                    } else if (g_prev_kb_state.left_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
-                        dpad_repeat_count++;
-                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
-                            left_arrow_pressed();
-                    } else if (g_prev_kb_state.left_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
-                        dpad_repeat_count = 0;
-                        left_arrow_released();
-                    }
+                } else if (g_prev_kb_state.left_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) {
+                    dpad_repeat_count = 0;
+                    left_arrow_released();
+                }
 
-                    if (!g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
-                        dpad_repeat_count = 0;
+                if (!g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                    dpad_repeat_count = 0;
+                    right_arrow_pressed();
+                } else if (g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                    dpad_repeat_count++;
+                    if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
                         right_arrow_pressed();
-                    } else if (g_prev_kb_state.right_arrow_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
-                        dpad_repeat_count++;
-                        if (dpad_repeat_count > 50 && dpad_repeat_count % 10 == 0)
-                            right_arrow_pressed();
-                    } else if (g_prev_kb_state.right_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
-                        dpad_repeat_count = 0;
-                        right_arrow_released();
-                    }
+                } else if (g_prev_kb_state.right_arrow_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) {
+                    dpad_repeat_count = 0;
+                    right_arrow_released();
+                }
 
-                    if (!g_prev_kb_state.space_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_A])
-                        space_pressed();
-                    else if (g_prev_kb_state.space_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_A])
-                        space_released();
+                if (!g_prev_kb_state.space_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_A])
+                    space_pressed();
+                else if (g_prev_kb_state.space_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_A])
+                    space_released();
 
-                    if (!g_prev_kb_state.enter_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_B])
-                        enter_pressed();
-                    else if (g_prev_kb_state.enter_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_B])
-                        enter_released();
+                if (!g_prev_kb_state.enter_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_B])
+                    enter_pressed();
+                else if (g_prev_kb_state.enter_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_B])
+                    enter_released();
 
-                    if (!g_prev_vir_state.minimize_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_X])
-                        minimize_pressed();
-                    else if (g_prev_vir_state.minimize_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_X])
-                        minimize_released();
+                if (!g_prev_vir_state.minimize_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_X])
+                    minimize_pressed();
+                else if (g_prev_vir_state.minimize_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_X])
+                    minimize_released();
 
-                    if (!g_prev_vir_state.maximize_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_Y])
-                        maximize_pressed();
-                    else if (g_prev_vir_state.maximize_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_Y])
-                        maximize_released();
+                if (!g_prev_vir_state.maximize_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_Y])
+                    maximize_pressed();
+                else if (g_prev_vir_state.maximize_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_Y])
+                    maximize_released();
 
-                    if (!g_prev_kb_state.win_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_START])
-                        win_pressed();
-                    else if (g_prev_kb_state.win_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_START])
-                        win_released();
+                if (!g_prev_kb_state.win_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_START])
+                    win_pressed();
+                else if (g_prev_kb_state.win_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_START])
+                    win_released();
 
-                    if (!g_prev_vir_state.select_all_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_BACK])
-                        select_all_pressed();
-                    else if (g_prev_vir_state.select_all_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_BACK])
-                        select_all_released();
+                if (!g_prev_vir_state.select_all_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_BACK])
+                    select_all_pressed();
+                else if (g_prev_vir_state.select_all_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_BACK])
+                    select_all_released();
 
-                    if (!g_prev_vir_state.copy_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
-                        copy_pressed();
-                    else if (g_prev_vir_state.copy_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
-                        copy_released();
+                if (!g_prev_vir_state.copy_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
+                    copy_pressed();
+                else if (g_prev_vir_state.copy_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
+                    copy_released();
 
-                    if (!g_prev_vir_state.paste_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
-                        paste_pressed();
-                    else if (g_prev_vir_state.paste_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
-                        paste_released();
+                if (!g_prev_vir_state.paste_pressed && state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
+                    paste_pressed();
+                else if (g_prev_vir_state.paste_pressed && !state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
+                    paste_released();
 
-                    this_thread::sleep_for(chrono::milliseconds(5));
-                    continue;
+                this_thread::sleep_for(chrono::milliseconds(5));
+                continue;
+                
+            }
+        } else {
+            if (ALLOW_ENABLE_VIA_GAMEPAD && g_js_connected) {
+                GLFWgamepadstate state;
+                if (!glfwGetGamepadState(g_js_id, &state)) continue;
+
+                if (state.buttons[GLFW_GAMEPAD_BUTTON_X] && state.buttons[GLFW_GAMEPAD_BUTTON_Y] &&
+                    state.buttons[GLFW_GAMEPAD_BUTTON_A] && state.buttons[GLFW_GAMEPAD_BUTTON_B]) {
+                    g_is_enabled = true;
+                    cout << "GamepadMouse has been enabled." << endl;
+                    MessageBeep(MB_ICONASTERISK);
                 }
             }
         }
