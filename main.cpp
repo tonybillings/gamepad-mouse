@@ -406,8 +406,10 @@ int main()
 {
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-    if (!glfwInit())
+    if (!glfwInit()) {
         cout << "Failed to initialize GLFW!" << endl;
+        return -1;
+    }
 
     glfwSetErrorCallback(error_callback);
     glfwSetJoystickCallback(joystick_callback);
