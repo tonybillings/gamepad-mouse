@@ -70,6 +70,8 @@ If the `ALLOW_ENABLE_VIA_GAMEPAD` parameter is set to true in `main.cpp`, you ca
 
 **Start Button** -> Windows key (which brings up the Start menu).  
 
+**Back+Start Buttons** -> Show the virtual on-screen keyboard.  NOTE: requires this app to be run with administrative privileges!  
+
 Currently there is no way to change the mapping via a config file, but using the existing code as a guide it wouldn't be hard to change the mappings to your liking!
 
 ## Cursor Movement
