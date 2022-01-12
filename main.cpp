@@ -655,6 +655,7 @@ int main()
 				if (!g_js_connected) check_joysticks();
 
 				if (g_js_connected) {
+					glfwPollEvents();
 					GLFWgamepadstate state;
 					if (!glfwGetGamepadState(g_js_id, &state)) continue;
 
